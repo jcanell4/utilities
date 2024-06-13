@@ -22,4 +22,11 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub owner Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/jcanell4/utilities</url>
+        </repository>
+    </distributionManagement>    
 </project>
