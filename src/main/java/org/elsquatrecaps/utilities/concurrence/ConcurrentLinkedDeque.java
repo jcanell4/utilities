@@ -30,9 +30,11 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             while(prMonitor.getValue() && this.size()>=maxSize){
                 prMonitor.wait(1000);
             }
+            if(prMonitor.getValue()){
+                super.addFirst(e);       
+            }
         }
         synchronized (coMonitor) {
-            super.addFirst(e);
             coMonitor.notifyAll();
         }
     }
@@ -43,16 +45,18 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             while(prMonitor.getValue() && this.size()>=maxSize){
                 prMonitor.wait(1000);
             }
+            if(prMonitor.getValue()){
+                super.addLast(e);
+            }            
         }
         synchronized (coMonitor) {
-            super.addLast(e);
             coMonitor.notifyAll();
         }
     }
 
     @Override
     public boolean offerFirst(E e, long timeout, TimeUnit unit) throws InterruptedException {
-        boolean ret;
+        boolean ret=false;
         long timeoutMillis = unit.toMillis(timeout);
         long counterMillis = 0;
         synchronized (prMonitor) {
@@ -60,9 +64,11 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
                 prMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(prMonitor.getValue()){
+                ret = super.offerFirst(e);            
+            }
         }
         synchronized (coMonitor) {
-            ret = super.offerFirst(e);
             coMonitor.notifyAll();
         }
         return ret;
@@ -70,7 +76,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
 
     @Override
     public boolean offerLast(E e, long timeout, TimeUnit unit) throws InterruptedException {
-        boolean ret;
+        boolean ret=false;
         long timeoutMillis = unit.toMillis(timeout);
         long counterMillis = 0;
         synchronized (prMonitor) {
@@ -78,9 +84,11 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
                 prMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(prMonitor.getValue()){
+                ret = super.offerLast(e);
+            }            
         }
         synchronized (coMonitor) {
-            ret = super.offerLast(e);
             coMonitor.notifyAll();
         }
         return ret;
@@ -93,10 +101,12 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             while(coMonitor.getValue() && this.isEmpty()){
                 coMonitor.wait(1000);
             }
+            if(this.tryToTake()){
+                ret = super.removeFirst();            
+            }
         }
-        if(this.tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.removeFirst();
                 prMonitor.notifyAll();
             }
         }
@@ -110,10 +120,12 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             while(coMonitor.getValue() && this.isEmpty()){
                 coMonitor.wait(1000);
             }
+            if(this.tryToTake()){
+                ret = super.removeLast();            
+            }
         }
-        if(this.tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.removeLast();
                 prMonitor.notifyAll();
             }
         }
@@ -130,10 +142,12 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
                 coMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(this.tryToTake()){            
+                ret = super.pollFirst();            
+            }
         }
-        if(this.tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.pollFirst();
                 prMonitor.notifyAll();
             }
         }
@@ -150,10 +164,12 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
                 coMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(this.tryToTake()){            
+                ret = super.pollLast();            
+            }
         }
-        if(this.tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.pollLast();
                 prMonitor.notifyAll();
             }
         }
@@ -174,7 +190,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
     @Override
     public E take() throws InterruptedException {        
         //Consumidor
-        int m = count++;
+//        int m = count++;
 //        System.out.println(String.format("\"Entering ConcurrentLinkedDeque::take with id\";\"D-%015d-E\"", m));
         E ret =  this.takeFirst();
 //        System.out.println(String.format("\"Leaving ConcurrentLinkedDeque::take with id\";\"D-%015d-L\"", m));
@@ -235,6 +251,10 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             coMonitor.setValue(false);
             coMonitor.notifyAll();
         }  
+        synchronized (prMonitor) {
+            prMonitor.setValue(false);
+            prMonitor.notifyAll();
+        }
         return this.isEmpty();
     }       
 }

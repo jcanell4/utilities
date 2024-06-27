@@ -27,12 +27,14 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
     @Override
     public void put(E e) throws InterruptedException {
         synchronized (prMonitor) {
-            while(this.size()>=maxSize){
+            while(prMonitor.getValue() && this.size()>=maxSize){
                 prMonitor.wait(1000);
             }
+            if(prMonitor.getValue()){
+                super.addLast(e);
+            }            
         }
         synchronized (coMonitor) {
-            super.addLast(e);
             coMonitor.notifyAll();
         }
     }
@@ -40,16 +42,18 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
     @Override
     public E take() throws InterruptedException {
         E ret=null;
-        int m = count++;
+//        int m = count++;
 //        System.out.println(String.format("\"Entering ConcurrentLinkedQueue::take with id\";\"Q-%015d-E\"", m));
         synchronized (coMonitor) {
             while(coMonitor.getValue() && this.isEmpty()){
                 coMonitor.wait(1000);
             }
+            if(this.tryToTake()){
+                ret = super.removeFirst();            
+            }
         }
-        if(tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.removeFirst();
                 prMonitor.notifyAll();
             }
         }
@@ -59,17 +63,19 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
 
     @Override
     public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
-        boolean ret;
+        boolean ret=false;
         long timeoutMillis = unit.toMillis(timeout);
         long counterMillis = 0;
         synchronized (prMonitor) {
-            while(counterMillis<timeoutMillis && this.size()>=maxSize){                
+            while(prMonitor.getValue() && counterMillis<timeoutMillis && this.size()>=maxSize){                
                 prMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(prMonitor.getValue()){
+                ret = super.offerLast(e);
+            }            
         }
         synchronized (coMonitor) {
-            ret = super.offerLast(e);
             coMonitor.notifyAll();
         }
         return ret;    
@@ -85,10 +91,12 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
                 coMonitor.wait(1000);
                 counterMillis += 1000;
             }
+            if(this.tryToTake()){            
+                ret = super.pollFirst();            
+            }
         }
-        if(tryToTake()){
+        if(ret!=null){
             synchronized (prMonitor) {
-                ret = super.pollFirst();
                 prMonitor.notifyAll();
             }
         }
@@ -143,6 +151,10 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
             coMonitor.setValue(false);
             coMonitor.notifyAll();
         }      
+        synchronized (prMonitor) {
+            prMonitor.setValue(false);
+            prMonitor.notifyAll();
+        }        
         return this.isEmpty();
     }       
 }
