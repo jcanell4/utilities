@@ -35,7 +35,7 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
             }            
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
     }
 
@@ -54,7 +54,7 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
 //        System.out.println(String.format("\"Leaving ConcurrentLinkedQueue::take with id\";\"Q-%015d-L\"", m));
@@ -76,7 +76,7 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
             }            
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
         return ret;    
     }
@@ -97,7 +97,7 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
         return ret;   

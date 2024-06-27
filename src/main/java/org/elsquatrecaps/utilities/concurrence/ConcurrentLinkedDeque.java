@@ -35,7 +35,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             }
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
     }
 
@@ -50,7 +50,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             }            
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
     }
 
@@ -69,7 +69,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             }
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
         return ret;
     }
@@ -89,7 +89,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
             }            
         }
         synchronized (coMonitor) {
-            coMonitor.notifyAll();
+            coMonitor.notify();
         }
         return ret;
     }
@@ -107,7 +107,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
         return ret;
@@ -126,7 +126,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
         return ret;
@@ -148,7 +148,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
         return ret;
@@ -170,7 +170,7 @@ public class ConcurrentLinkedDeque<E> extends LinkedList<E> implements Concurren
         }
         if(ret!=null){
             synchronized (prMonitor) {
-                prMonitor.notifyAll();
+                prMonitor.notify();
             }
         }
         return ret;
