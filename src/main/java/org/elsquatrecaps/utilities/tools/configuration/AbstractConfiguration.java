@@ -1,5 +1,6 @@
 package org.elsquatrecaps.utilities.tools.configuration;
 
+import org.elsquatrecaps.exceptions.IoRuntimeException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
