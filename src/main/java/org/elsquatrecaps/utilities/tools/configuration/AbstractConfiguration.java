@@ -1,6 +1,5 @@
 package org.elsquatrecaps.utilities.tools.configuration;
 
-import org.elsquatrecaps.exceptions.IoRuntimeException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +18,7 @@ import org.elsquatrecaps.utilities.tools.Callback;
  *
  * @author josep
  */
-public abstract class AbstractConfiguration {
+public abstract class AbstractConfiguration implements Configuration{
     
     private final Set<String> attrs = new HashSet<>();
 
@@ -30,18 +29,18 @@ public abstract class AbstractConfiguration {
         configure();
     }
 
-    public static Properties loadAndGetConfigProperties(String propertiesPath){
+    private static Properties loadAndGetConfigProperties(String propertiesPath){
         Properties properties = new Properties();
         try {
             properties.load(new FileReader(propertiesPath));
         } catch (IOException ex) {
             Logger.getLogger(AbstractConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-            throw new IoRuntimeException(ex);
+            throw new RuntimeException(ex);
         }
         return properties;
     }
     
-    public static Properties loadAndGetConfigProperties(){
+    private static Properties loadAndGetConfigProperties(){
         Properties properties;
         if(Files.exists(Paths.get("init.properties"))){
             properties = loadAndGetConfigProperties("init.properties");
@@ -54,13 +53,18 @@ public abstract class AbstractConfiguration {
     }
     
     public void configure(String propertiesPath){
-        
+        AbstractConfiguration args = this;
+        Properties properties = loadAndGetConfigProperties(propertiesPath);
+        properties.forEach((Object k, Object v) -> {
+            args.setDefaultArg(String.valueOf(k), v);
+        });
     }
     
     public void configure(){
+        AbstractConfiguration args = this;
         Properties properties = loadAndGetConfigProperties();
         properties.forEach((Object k, Object v) -> {
-            this.setDefaultArg(String.valueOf(k), v);
+            args.setDefaultArg(String.valueOf(k), v);
         });
     }
     
