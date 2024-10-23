@@ -24,7 +24,7 @@ public abstract class AbstractConfiguration implements Configuration{
     
     private final Set<String> attrs = new HashSet<>();
 
-    protected abstract void setDefaultArg(String dest, Object val);
+    protected abstract boolean setDefaultArg(String dest, Object val);
 
     public void parseArgumentsAndConfigure(String[] args) {
         parseArguments(args);
@@ -58,7 +58,10 @@ public abstract class AbstractConfiguration implements Configuration{
         AbstractConfiguration args = this;
         Properties properties = loadAndGetConfigProperties(propertiesPath);
         properties.forEach((Object k, Object v) -> {
-            args.setDefaultArg(String.valueOf(k), v);
+            boolean b = args.setDefaultArg(String.valueOf(k), v);
+            if(!b){
+                System.setProperty(String.valueOf(k), (String) v);
+            }
         });
     }
     
