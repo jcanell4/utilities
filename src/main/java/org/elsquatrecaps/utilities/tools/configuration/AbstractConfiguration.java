@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -110,32 +112,30 @@ public abstract class AbstractConfiguration implements Configuration{
         return ret;
     }
 
+    public<T> Map<String, T> getMap(String val, Callback<Void, Map<String, T>> creator, Callback<String, T> transformer) {
+        Map<String, T> ret=null;
+        if (val != null) {
+            val = Pattern.compile("(?:\\{?)(.*?)(?:\\}?)", Pattern.MULTILINE).matcher(val).replaceAll("$1");
+            String[] sret = val.trim().split("[,]");
+            ret = creator.call(null);
+            for(String strEntry: sret){
+                String[] aStrEntry = strEntry.split("[:]");
+                ret.put(aStrEntry[0], transformer.call(aStrEntry[1].trim()));
+            }
+        }
+        return ret;
+    }
+ 
+    public Map<String, String> getStringMap(String val) {
+        return getMap(val, (Void param) -> new HashMap<>(), (String param) ->  param);
+    }
+    
     public String[] getStringArray(String val) {
-        return getArray(val, new Callback<Integer, String[]>() {
-            @Override
-            public String[] call(Integer l) {
-                return new String[l];
-            }
-        }, new Callback<String, String>() {
-            @Override
-            public String call(String param) {
-                return param;
-            }
-        });
+        return getArray(val, (Integer l) -> new String[l], (String param) -> param);
     }
 
     public Integer[] getIntArray(String val) {
-        return getArray(val, new Callback<Integer, Integer[]>() {
-            @Override
-            public Integer[] call(Integer l) {
-                return new Integer[l];
-            }
-        }, new Callback<String, Integer>() {
-            @Override
-            public Integer call(String param) {
-                return Integer.valueOf(param);
-            }
-        });
+        return getArray(val, (Integer l) -> new Integer[l], (String param) -> Integer.valueOf(param));
     }
 
     protected abstract void updateAttrs();

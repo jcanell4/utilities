@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package org.elsquatrecaps.utilities.proxies;
 
 import java.lang.annotation.Annotation;
@@ -66,9 +62,9 @@ public class ProxyByAnnotationsBuilder<T, A extends Annotation> {
     private static String getMarkAnnotationIdValue(Annotation annot){
         List<String> id = new ArrayList<>();
         List<Integer>order = new ArrayList<>();
-        Method[] am = annot.getClass().getDeclaredMethods();
+        Method[] am = annot.annotationType().getMethods();
         for(Method m: am){
-            PartOfMarkAnnotationId p = m.getDeclaredAnnotation(PartOfMarkAnnotationId.class);
+            PartOfMarkAnnotationId p = m.getAnnotation(PartOfMarkAnnotationId.class);
             if(p!=null){
                 try {
                     int pos=id.size();
