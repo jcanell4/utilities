@@ -1,5 +1,6 @@
 package org.elsquatrecaps.utilities.tools.configuration;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,7 +22,7 @@ import org.elsquatrecaps.utilities.tools.Callback;
  * @author josep
  */
 public abstract class AbstractConfiguration implements Configuration{
-    
+    protected File initConfigFile=null;
     private final Set<String> attrs = new HashSet<>();
 
     protected abstract boolean setDefaultArg(String dest, Object val);
@@ -66,8 +67,13 @@ public abstract class AbstractConfiguration implements Configuration{
     }
     
     public void configure(){
+        Properties properties;
         AbstractConfiguration args = this;
-        Properties properties = loadAndGetConfigProperties();
+        if(this.getInitConfigFile()!=null){
+            properties = loadAndGetConfigProperties(getInitConfigFile().getAbsolutePath());
+        }else{
+            properties = loadAndGetConfigProperties();
+        }
         properties.forEach((Object k, Object v) -> {
             args.setDefaultArg(String.valueOf(k), v);
         });
@@ -75,6 +81,20 @@ public abstract class AbstractConfiguration implements Configuration{
     
     
     public abstract void parseArguments(String[] args);
+
+    public File getFile(String val) {
+        return getFile(val, "");
+    }
+    
+    private File getFile(String val, String defaultFile) {
+        File ret;
+        if(val!=null){
+            ret = new File(val);
+        }else{
+            ret = new File(defaultFile);
+        }
+        return ret; 
+    }
 
     public Boolean getBoolean(String val) {
         return val != null && (val.equalsIgnoreCase("true") || val.equalsIgnoreCase("t") || val.equalsIgnoreCase("yes") || val.equalsIgnoreCase("y") || val.equalsIgnoreCase("si") || val.equalsIgnoreCase("s") || val.equalsIgnoreCase("vertader") || val.equalsIgnoreCase("vertadera") || val.equalsIgnoreCase("v") || val.equalsIgnoreCase("cert") || val.equalsIgnoreCase("certa") || val.equalsIgnoreCase("c"));
@@ -145,6 +165,17 @@ public abstract class AbstractConfiguration implements Configuration{
 
     public Set<String> getAttrs() {
         return attrs;
+    }
+
+    /**
+     * @return the initConfigFile
+     */
+    public File getInitConfigFile() {
+        return initConfigFile;
+    }
+    
+    protected void setInitConfigFile(File iniConfigFile) {
+        this.initConfigFile = iniConfigFile;                
     }
     
 }
