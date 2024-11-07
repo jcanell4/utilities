@@ -27,23 +27,18 @@ public abstract class AbstractConfiguration implements Configuration{
 
     protected abstract boolean setDefaultArg(String dest, Object val);
 
-    public void parseArgumentsAndConfigure(String[] args) {
+    public void parseArgumentsAndConfigure(String[] args) throws IOException {
         parseArguments(args);
         configure();
     }
 
-    private static Properties loadAndGetConfigProperties(String propertiesPath){
+    private static Properties loadAndGetConfigProperties(String propertiesPath) throws IOException{
         Properties properties = new Properties();
-        try {
-            properties.load(new FileReader(propertiesPath));
-        } catch (IOException ex) {
-            Logger.getLogger(AbstractConfiguration.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
+        properties.load(new FileReader(propertiesPath));
         return properties;
     }
     
-    private static Properties loadAndGetConfigProperties(){
+    private static Properties loadAndGetConfigProperties() throws IOException{
         Properties properties;
         if(Files.exists(Paths.get("init.properties"))){
             properties = loadAndGetConfigProperties("init.properties");
@@ -55,7 +50,7 @@ public abstract class AbstractConfiguration implements Configuration{
         return properties;
     }
     
-    public void configure(String propertiesPath){
+    public void configure(String propertiesPath) throws IOException{
         AbstractConfiguration args = this;
         Properties properties = loadAndGetConfigProperties(propertiesPath);
         properties.forEach((Object k, Object v) -> {
@@ -66,7 +61,7 @@ public abstract class AbstractConfiguration implements Configuration{
         });
     }
     
-    public void configure(){
+    public void configure() throws IOException{
         Properties properties;
         AbstractConfiguration args = this;
         if(this.getInitConfigFile()!=null){
