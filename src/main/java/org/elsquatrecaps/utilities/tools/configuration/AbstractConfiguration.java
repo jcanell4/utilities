@@ -145,15 +145,15 @@ public abstract class AbstractConfiguration implements Configuration{
     }
  
     public Map<String, String> getStringMap(String val) {
-        return getMap(val, (Void param) -> new HashMap<>(), (String param) ->  param);
+        return getMap(val, (Void param) -> new HashMap<>(), (String param) ->  param.trim());
     }
     
     public String[] getStringArray(String val) {
-        return getArray(val, (Integer l) -> new String[l], (String param) -> param);
+        return getArray(val, (Integer l) -> new String[l], (String param) -> param.trim());
     }
 
     public Integer[] getIntArray(String val) {
-        return getArray(val, (Integer l) -> new Integer[l], (String param) -> Integer.valueOf(param));
+        return getArray(val, (Integer l) -> new Integer[l], (String param) -> Integer.valueOf(param.trim()));
     }
 
     protected abstract void updateAttrs();
