@@ -71,8 +71,12 @@ public class ProxyByAnnotationsBuilder<T, A extends Annotation> {
                     id.add((String) m.invoke(annot));
                     order.add(p.orderNum());
                     while(pos>0 && order.get(pos)<order.get(pos-1)){
+                        Integer iaux = order.get(pos-1);
                         order.set(pos-1, order.get(pos));
+                        order.set(pos, iaux);
+                        String saux = id.get(pos-1);
                         id.set(pos-1, id.get(pos));
+                        id.set(pos, saux);
                         pos--;
                     }
                 } catch (IllegalAccessException | InvocationTargetException ex) {

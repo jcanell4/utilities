@@ -30,6 +30,11 @@ public abstract class AbstractConfiguration implements Configuration{
         configure();
     }
 
+    public void parseArgumentsAndConfigure(String[] args, String propertiesPath) throws IOException {
+        parseArguments(args);
+        configure(propertiesPath);
+    }
+
     private static Properties loadAndGetConfigProperties(String propertiesPath) throws IOException{
         Properties properties = new Properties();
         properties.load(new FileReader(propertiesPath));

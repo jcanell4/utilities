@@ -15,6 +15,9 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
     private final Monitor<Boolean> coMonitor = new Monitor(true);
     private String keyForClose=null;
 
+    public ConcurrentLinkedQueue() {
+    }
+
     public ConcurrentLinkedQueue(String keyForClose, int maxSize) {
         this.maxSize = maxSize;
         this.keyForClose = keyForClose;
@@ -102,6 +105,50 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
         }
         return ret;   
     }
+    
+    @Override
+    public E peekWaitingForValue(long timeout, TimeUnit unit) throws InterruptedException {
+        E ret=null;
+        long timeoutMillis = unit.toMillis(timeout);
+        long counterMillis = 0;
+        synchronized (coMonitor) {
+            while(coMonitor.getValue() && counterMillis<timeoutMillis && this.isEmpty()){                
+                coMonitor.wait(1000);
+                counterMillis += 1000;
+            }
+            if(this.tryToTake()){            
+                ret = super.peekFirst();            
+            }
+        }
+        if(ret!=null){
+            synchronized (prMonitor) {
+                prMonitor.notify();
+            }
+        }
+        return ret;           
+    }
+    
+    @Override
+    public E peekWaitingForValue()  throws InterruptedException{
+        E ret=null;
+//        int m = count++;
+//        System.out.println(String.format("\"Entering ConcurrentLinkedQueue::take with id\";\"Q-%015d-E\"", m));
+        synchronized (coMonitor) {
+            while(coMonitor.getValue() && this.isEmpty()){
+                coMonitor.wait(1000);
+            }
+            if(this.tryToTake()){
+                ret = super.peek();            
+            }
+        }
+        if(ret!=null){
+            synchronized (prMonitor) {
+                prMonitor.notify();
+            }
+        }
+//        System.out.println(String.format("\"Leaving ConcurrentLinkedQueue::take with id\";\"Q-%015d-L\"", m));
+        return ret;        
+    }
 
     @Override
     public int remainingCapacity() {
@@ -144,6 +191,11 @@ public class ConcurrentLinkedQueue<E> extends LinkedList<E> implements Concurren
         if(!this.keyForClose.equals(keyForClose)){
             throw new RuntimeException("Error. close method is calling with wrong key");
         }
+        return close();
+    }
+    
+    @Override
+    public boolean close(){
         if(this.size()==maxSize){
             //???
         }

@@ -5,6 +5,7 @@
 package org.elsquatrecaps.utilities.concurrence;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -14,5 +15,8 @@ public interface ConcurrentQueue<E> extends BlockingQueue<E>{
     int THREAD_PROVIDER=0;
     int THREAD_CONSUMER=1;
     void preventNextlocking();
+    public E peekWaitingForValue(long timeout, TimeUnit unit) throws InterruptedException;
+    public E peekWaitingForValue()  throws InterruptedException;
     boolean close(String fromThreadName);
+    boolean close();
 }
